@@ -1,0 +1,63 @@
+# Private reference and data directories
+00_Reference/
+01_Data/
+
+# Environment
+.env
+.env.local
+
+# Local-only tracking files
+KNOWN_ISSUES.md
+CHANGELOG.md
+PRODUCT_VISION.md
+
+# Analysis outputs (regenerated from pipeline)
+03_Analysis/*.csv
+03_Analysis/*.parquet
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+.uv/
+
+# Parquet and large data files
+*.parquet
+*.feather
+*.arrow
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Batch edit marker (never commit)
+.batch-edits
+
+# Reports (generated output)
+03_Analysis/reports/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/

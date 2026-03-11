@@ -1,0 +1,6 @@
+device_name,manufacturer,approved_date,grade,model,market_price_low,market_price_mid,market_price_high
+FreeStyle Libre,Abbott,2020-05-01,2,Libre 2,155000,180000,200000
+Dexcom G6,Dexcom Inc.,2019-01-01,2,G6,180000,200000,220000
+Dexcom G7,Dexcom Inc.,2024-10-01,2,G7,220000,250000,280000
+Guardian 4,Medtronic,2022-01-01,2,Guardian 4,350000,380000,400000
+CareSens Air,i-SENS,2023-09-01,2,CareSens Air,155000,165000,175000
