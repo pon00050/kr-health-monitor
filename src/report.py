@@ -125,7 +125,11 @@ def _build_ceiling_chart(gap_df: pd.DataFrame) -> str:
 
 
 def _build_adoption_chart(trend_df: pd.DataFrame) -> str:
-    """CGM actual users vs registered eligible pool, with adoption rate overlay."""
+    """Stacked bar: CGM users (blue) + non-users (amber) = registered eligible pool.
+
+    The amber block is the gap — it shrinks year-over-year as adoption grows.
+    Rate line on secondary y-axis shows the trend as a %.
+    """
     try:
         import plotly.graph_objects as go
         from plotly.subplots import make_subplots
@@ -138,47 +142,50 @@ def _build_adoption_chart(trend_df: pd.DataFrame) -> str:
 
     fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-    # Bars: registered T1D beneficiaries (denominator)
-    if "t1d_registered" in df.columns and df["t1d_registered"].notna().any():
-        fig.add_trace(go.Bar(
-            x=years,
-            y=df["t1d_registered"].tolist(),
-            name="등록 T1D 요양비 수급자",
-            marker_color="rgba(147,197,253,0.75)",
-            hovertemplate="등록 수급자: %{y:,}명<extra></extra>",
-        ), secondary_y=False)
-
-    # Bars: actual CGM users
+    # Bottom stack: CGM users (the "succeeded" portion)
     fig.add_trace(go.Bar(
         x=years,
         y=df["cgm_users"].tolist(),
-        name="실제 CGM 이용자",
+        name="CGM 이용자",
         marker_color="rgba(37,99,235,0.85)",
         hovertemplate="CGM 이용자: %{y:,}명<extra></extra>",
     ), secondary_y=False)
 
-    # Line: adoption rate
+    # Top stack: non-users = registered − users (the remaining gap)
+    if "t1d_registered" in df.columns and df["t1d_registered"].notna().any():
+        non_users = (df["t1d_registered"] - df["cgm_users"]).where(
+            df["t1d_registered"].notna()
+        )
+        fig.add_trace(go.Bar(
+            x=years,
+            y=non_users.tolist(),
+            name="미이용 (등록 수급자 중)",
+            marker_color="rgba(251,146,60,0.75)",
+            hovertemplate="미이용: %{y:,}명<extra></extra>",
+        ), secondary_y=False)
+
+    # Line: adoption rate (% of registered)
     if "adoption_rate_registered" in df.columns and df["adoption_rate_registered"].notna().any():
         rate = (df["adoption_rate_registered"] * 100).round(1)
         fig.add_trace(go.Scatter(
             x=years,
             y=rate.tolist(),
             mode="lines+markers+text",
-            name="실제 사용률 (%)",
-            line=dict(color="rgb(234,88,12)", width=2.5),
-            marker=dict(size=8, color="rgb(234,88,12)"),
-            text=[f"{v:.1f}%" if pd.notna(v) else "" for v in rate],
+            name="이용률 (%)",
+            line=dict(color="rgb(220,38,38)", width=2.5),
+            marker=dict(size=8, color="rgb(220,38,38)"),
+            text=[f"{v:.0f}%" if pd.notna(v) else "" for v in rate],
             textposition="top center",
-            textfont=dict(size=11, color="rgb(234,88,12)"),
-            hovertemplate="사용률: %{y:.1f}%<extra></extra>",
+            textfont=dict(size=11, color="rgb(220,38,38)"),
+            hovertemplate="이용률: %{y:.1f}%<extra></extra>",
         ), secondary_y=True)
 
     fig.update_layout(
         title=dict(
-            text="CGM 실제 이용자 수 vs 등록 수급자 (2020–2024)",
+            text="T1D 요양비 등록 수급자: CGM 이용자 vs 미이용자 (2020–2024)",
             font=dict(size=15, color="#1e293b"),
         ),
-        barmode="overlay",
+        barmode="stack",
         xaxis=dict(title="연도", dtick=1, showgrid=True, gridcolor="rgba(0,0,0,0.05)"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         plot_bgcolor="white",
@@ -194,7 +201,7 @@ def _build_adoption_chart(trend_df: pd.DataFrame) -> str:
         gridcolor="rgba(0,0,0,0.05)",
     )
     fig.update_yaxes(
-        title_text="사용률 (%)",
+        title_text="이용률 (%)",
         ticksuffix="%",
         secondary_y=True,
         showgrid=False,
@@ -388,11 +395,16 @@ _TEMPLATE = """<!DOCTYPE html>
 
   {% if adoption_chart_json %}
   <div class="section">
-    <h2>② CGM 실제 이용률 — 급여 적용에도 낮은 접근성</h2>
+    <h2>② CGM 이용률 추이 — 급여로 4배 성장, 그래도 6할은 미이용</h2>
     <p class="context">
-      급여 혜택을 받을 수 있는 1형 당뇨 요양비 등록 수급자 중
-      <strong>실제로 CGM을 사용하는 환자 비율</strong>입니다.
-      이용률이 낮다면 경제적 부담(높은 자기부담금)이 접근성을 여전히 제한하고 있음을 시사합니다.
+      급여 도입(2022년 8월) 이후 이용률은
+      {% if adoption_ctx %}<strong>{{ adoption_ctx.earliest_rate }}({{ adoption_ctx.earliest_year }}) → {{ adoption_ctx.latest_rate }}({{ adoption_ctx.latest_year }})</strong>로
+      증가했습니다. 급여 정책은 분명한 효과를 냈습니다. 그러나
+      {{ adoption_ctx.latest_year }}년 기준 등록 T1D 수급자 {{ adoption_ctx.t1d_registered }}명 중
+      <strong>{{ adoption_ctx.non_users }}명({{ adoption_ctx.pct_not_using }}%)은 여전히 CGM을 쓰지 않습니다.</strong>
+      {% else %}지속적으로 증가했으나, 여전히 다수의 등록 수급자가 CGM을 이용하지 않습니다.
+      {% endif %}
+      시장가의 68–82%를 자기부담하는 구조가 가장 유력한 접근성 장벽입니다.
     </p>
     <div id="adoption-chart"></div>
   </div>
@@ -558,15 +570,42 @@ def generate_report(
     else:
         burden_str = "N/A"
 
-    # KPI 2: CGM adoption rate (latest year with data)
-    adoption_str = "N/A"
-    adoption_year = ""
-    if "adoption_rate_registered" in trend_df.columns:
-        valid = trend_df[trend_df["adoption_rate_registered"].notna()].sort_values("year")
-        if not valid.empty:
-            rate = valid.iloc[-1]["adoption_rate_registered"]
-            adoption_year = str(int(valid.iloc[-1]["year"]))
-            adoption_str = f"{rate * 100:.1f}%"
+    # KPI 2: Non-user count (latest year where both cgm_users and t1d_registered are known)
+    # Showing the gap (absolute non-users) rather than adoption rate — more policy-actionable.
+    non_user_str = "N/A"
+    non_user_year = ""
+    non_user_note = "등록 T1D 요양비 수급자 중 CGM 미이용 환자 수"
+    adoption_ctx: dict = {}
+    if "cgm_users" in trend_df.columns and "t1d_registered" in trend_df.columns:
+        valid_both = trend_df[
+            trend_df["cgm_users"].notna() & trend_df["t1d_registered"].notna()
+        ].sort_values("year")
+        if not valid_both.empty:
+            earliest = valid_both.iloc[0]
+            latest = valid_both.iloc[-1]
+            non_users = int(latest["t1d_registered"]) - int(latest["cgm_users"])
+            pct_not_using = round(non_users / int(latest["t1d_registered"]) * 100)
+            non_user_year = str(int(latest["year"]))
+            non_user_str = f"{non_users:,}명"
+            non_user_note = (
+                f"등록 수급자 {int(latest['t1d_registered']):,}명의 {pct_not_using}%"
+                " — 급여 있어도 접근 못함"
+            )
+            earliest_rate = round(
+                float(earliest["cgm_users"]) / float(earliest["t1d_registered"]) * 100
+            )
+            latest_rate = round(
+                float(latest["cgm_users"]) / float(latest["t1d_registered"]) * 100
+            )
+            adoption_ctx = {
+                "earliest_year": int(earliest["year"]),
+                "earliest_rate": f"{earliest_rate}%",
+                "latest_year": int(latest["year"]),
+                "latest_rate": f"{latest_rate}%",
+                "non_users": f"{non_users:,}",
+                "t1d_registered": f"{int(latest['t1d_registered']):,}",
+                "pct_not_using": str(pct_not_using),
+            }
 
     kpis = [
         {
@@ -576,10 +615,10 @@ def generate_report(
             "note": "건강보험 적용 후에도 시장가의 68–82%를 환자가 직접 부담",
         },
         {
-            "cls": "",
-            "label": f"CGM 실제 이용률 ({adoption_year})",
-            "value": adoption_str,
-            "note": "등록 T1D 요양비 수급자 중 실제 CGM을 사용하는 환자 비율",
+            "cls": "warning",
+            "label": f"CGM 미이용 T1D 환자 ({non_user_year})",
+            "value": non_user_str,
+            "note": non_user_note,
         },
         {
             "cls": "",
@@ -610,6 +649,7 @@ def generate_report(
         data_date=data_date,
         generated_at=generated_at,
         kpis=kpis,
+        adoption_ctx=adoption_ctx,
         ceiling_chart_json=ceiling_json,
         adoption_chart_json=adoption_json,
         regional_chart_json=regional_json,
