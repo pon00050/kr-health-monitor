@@ -14,38 +14,52 @@ medical devices (starting with CGM/T1D). Outputs are policy analysis, not invest
 
 ## Development Environment
 
-`uv` for package management. Analysis scripts in `03_Analysis/` as plain `.py` files.
+`uv` for package management. Analysis scripts in `analysis/` as plain `.py` files.
 
 > **Marimo is optional.** Use runners (`run_*.py`) instead of `marimo edit` directly.
 > `krh` is the primary CLI interface.
 
 ```bash
-# Install dependencies
+# Install dependencies (core + dev)
 uv sync --extra dev
 
+# Optional extras
+uv sync --extra viz      # Marimo + Plotly (for interactive notebooks)
+uv sync --extra report   # Jinja2 (for HTML report generation via `krh report`)
+
+# All scripts must be run via uv or inside an activated venv:
+#   uv run python pipeline/fetch_nhis.py
+# Running bare `python pipeline/fetch_nhis.py` may fail with ImportError.
+
 # Full pipeline
-python 02_Pipeline/pipeline.py --device cgm_sensor --year-range 2018-2026 --sample 5
+python pipeline/run.py --device cgm_sensor --year-range 2018-2026 --sample 5
 
 # Analysis runners
-python 03_Analysis/run_coverage_analysis.py   # → 03_Analysis/coverage_adequacy.csv
-python 03_Analysis/run_regional_variation.py  # → 03_Analysis/regional_variation.csv
-python 03_Analysis/run_trend_analysis.py      # → 03_Analysis/trend_analysis.csv
+python analysis/run_coverage_gap.py      # → analysis/coverage_gap.csv
+python analysis/run_regional_equity.py   # → analysis/regional_equity.csv
+python analysis/run_coverage_trend.py    # → analysis/coverage_trend.csv
 
 # Check inventory
 krh status
 krh audit
 ```
 
+**Path convention (capital D vs lowercase d):**
+- `Data/raw/used/` — user-placed source files (gitignored; capital D, Windows convention).
+  Defined in `src/config.py` as `DATA_SOURCE_DIR`. Place downloaded Excel/CSV files here.
+- `data/processed/` — pipeline-generated parquets (gitignored; lowercase d).
+  Defined in `src/store.py` as `PROCESSED_DIR`.
+
 ---
 
 ## Privacy Rule
 
 This is a **public GitHub repository**. The following directories/files are **gitignored**:
-- `00_Reference/` — all local reference docs
-- `01_Data/` — all raw and processed data
+- `Reference/` — all local reference docs
+- `Data/` — all raw and processed data
 - `.env` — API keys
 - `KNOWN_ISSUES.md`, `CHANGELOG.md` — local tracking
-- `03_Analysis/*.csv` — regenerated outputs
+- `analysis/*.csv` — regenerated outputs
 
 **Never commit API keys. Never commit patient data.**
 
@@ -59,6 +73,20 @@ and commit both `pyproject.toml` and `uv.lock` together.
 **Test-driven development:** Write tests first (RED), then implement (GREEN).
 Run `python -m pytest tests/ -v` before any commit touching source code.
 
+**Bug logging rule:** Every time a bug is encountered and resolved, append a new entry
+to `memory/bugs.md` before moving on. No exceptions. Each entry must include:
+- A sequential ID (BUG-NNN)
+- File and function where the bug lives
+- **Symptom** — what observable behavior revealed the bug
+- **Investigation** — every hypothesis tried and how it was eliminated (including dead ends)
+- **Root cause** — the actual underlying reason, not just the surface fix
+- **Fix** — exactly what changed in the code
+- **Lesson** — the generalizable rule to avoid this class of bug in future
+
+The investigation section is mandatory even when the fix is obvious. The dead ends and
+wrong hypotheses are as important to record as the solution — they prevent re-investigating
+the same dead ends in future sessions.
+
 ---
 
 ## Key Data Facts (verified March 2026)
@@ -71,6 +99,12 @@ Run `python -m pytest tests/ -v` before any commit touching source code.
 - MFDS API has NO price data — prices are hardcoded constants
 - NHIS datasets are bulk file downloads, NOT REST APIs
 - CGM regional adoption data is NOT in public APIs — HIRA Excel is the denominator only
+
+**Column naming — two distinct metrics, not interchangeable:**
+- `patient_share_pct` in `regional_equity.csv` = regional_patients / national_total × 100
+  (share of national diabetes patients by region — geographic distribution metric)
+- `adoption_rate_registered` in `coverage_trend.csv` = cgm_users / t1d_registered × 100
+  (actual CGM uptake rate — policy effectiveness metric)
 
 ---
 
