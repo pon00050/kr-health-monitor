@@ -3,6 +3,7 @@
 **공개 데이터로 측정하는 NHIS 연속혈당측정기 급여 적정성 격차**
 **Quantifying the NHIS reimbursement gap for CGM devices in Korea — using only public data**
 
+For further inquiries, please contact Jisoo at pon00050@gmail.com
 ---
 
 **인터랙티브 보고서 (Python 불필요):**
@@ -152,6 +153,8 @@ NHIS data.go.kr             →   pipeline/fetch_nhis  →  analysis/regional_eq
                              data/processed/*.parquet           ↓
                                                    cgm_coverage_report.html
 ```
+
+→ [Full methodology](METHODOLOGY.md) | [Pipeline architecture](PIPELINE.md)
 
 ### CLI Reference
 
