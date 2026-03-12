@@ -469,7 +469,7 @@ _TEMPLATE = """<!DOCTYPE html>
 
 def generate_report(
     output_path: Path | None = None,
-    github_repo: str = "your-username/kr-health-monitor",
+    github_repo: str = "pon00050/kr-health-monitor",
 ) -> Path:
     """Generate the public-facing interactive HTML policy brief.
 

@@ -154,8 +154,8 @@ def main() -> None:
     p_report = sub.add_parser("report", help="Generate interactive HTML policy brief")
     p_report.add_argument(
         "--github-repo", dest="github_repo",
-        default="your-username/kr-health-monitor",
-        help="GitHub repo slug for the CTA link (e.g. pon00/kr-health-monitor)",
+        default="pon00050/kr-health-monitor",
+        help="GitHub repo slug for the CTA link (e.g. pon00050/kr-health-monitor)",
     )
     p_report.set_defaults(func=cmd_report)
 
