@@ -1,6 +1,6 @@
 # Private reference and data directories
-00_Reference/
-01_Data/
+reference/
+data/
 
 # Environment
 .env
@@ -12,8 +12,14 @@ CHANGELOG.md
 PRODUCT_VISION.md
 
 # Analysis outputs (regenerated from pipeline)
-03_Analysis/*.csv
-03_Analysis/*.parquet
+# Four policy CSVs are intentionally tracked — see below
+analysis/*.parquet
+
+# Track only the four published policy snapshots
+!analysis/coverage_gap.csv
+!analysis/coverage_gap_by_product.csv
+!analysis/regional_equity.csv
+!analysis/coverage_trend.csv
 
 # Python
 __pycache__/
@@ -55,9 +61,12 @@ Thumbs.db
 .batch-edits
 
 # Reports (generated output)
-03_Analysis/reports/
+analysis/reports/
 
 # Test cache
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Claude Code local session state
+.claude/settings.local.json
