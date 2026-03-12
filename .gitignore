@@ -60,8 +60,9 @@ Thumbs.db
 # Batch edit marker (never commit)
 .batch-edits
 
-# Reports (generated output)
-analysis/reports/
+# Reports (generated output — except the published policy brief)
+analysis/reports/*
+!analysis/reports/cgm_coverage_report.html
 
 # Test cache
 .pytest_cache/

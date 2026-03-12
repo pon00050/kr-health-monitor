@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NHIS CGM 급여 적정성 분석 보고서</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+      background: #f8fafc; color: #1e293b; line-height: 1.6;
+    }
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    /* Header */
+    .report-header { border-bottom: 3px solid #1d4ed8; padding-bottom: 24px; margin-bottom: 40px; }
+    .report-header h1 { font-size: 1.75rem; color: #1d4ed8; font-weight: 700; }
+    .report-header .subtitle { font-size: 0.95rem; color: #475569; margin-top: 6px; }
+    .report-header .meta { font-size: 0.78rem; color: #94a3b8; margin-top: 10px; }
+
+    /* KPI cards */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .kpi {
+      background: white; border-radius: 12px; padding: 24px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-top: 4px solid #1d4ed8;
+    }
+    .kpi.warning { border-top-color: #dc2626; }
+    .kpi-label { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .kpi-value { font-size: 2.4rem; font-weight: 800; color: #1e293b; line-height: 1.1; }
+    .kpi.warning .kpi-value { color: #dc2626; }
+    .kpi-note { font-size: 0.75rem; color: #94a3b8; margin-top: 8px; }
+
+    /* Chart sections */
+    .section {
+      background: white; border-radius: 12px; padding: 28px;
+      margin-bottom: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .section h2 { font-size: 1.05rem; color: #1e293b; font-weight: 700; margin-bottom: 8px; }
+    .section .context {
+      font-size: 0.84rem; color: #64748b; margin-bottom: 20px;
+      border-left: 3px solid #e2e8f0; padding-left: 12px; line-height: 1.7;
+    }
+
+    /* More data panel */
+    .more-data {
+      background: #eff6ff; border: 1px solid #bfdbfe;
+      border-radius: 12px; padding: 28px; margin-bottom: 28px;
+    }
+    .more-data h2 { font-size: 1.05rem; color: #1d4ed8; font-weight: 700; margin-bottom: 10px; }
+    .more-data .lead { font-size: 0.875rem; color: #374151; margin-bottom: 16px; }
+    .dataset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .dataset-item {
+      background: white; border-radius: 8px; padding: 14px 16px; font-size: 0.84rem;
+    }
+    .dataset-item strong { display: block; color: #1e293b; margin-bottom: 4px; font-size: 0.87rem; }
+    .dataset-item span { color: #64748b; }
+    .cta { font-size: 0.875rem; color: #1e293b; }
+    .cta a { color: #1d4ed8; font-weight: 600; text-decoration: none; }
+    .cta a:hover { text-decoration: underline; }
+
+    /* Disclaimer */
+    .disclaimer {
+      font-size: 0.75rem; color: #94a3b8;
+      border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 8px; line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="report-header">
+    <h1>NHIS CGM 급여 적정성 분석 보고서</h1>
+    <p class="subtitle">연속혈당측정기(CGM) 건강보험 급여 적정성 분석 — 1형 당뇨 환자 실비 부담 현황</p>
+    <p class="meta">
+      데이터 기준: 2026-03-12 &nbsp;|&nbsp;
+      생성일: 2026-03-12 19:13 &nbsp;|&nbsp;
+      출처: 국민건강보험공단(NHIS), 건강보험심사평가원(HIRA), 식품의약품안전처(MFDS)
+    </p>
+  </header>
+
+  <div class="kpis">
+    
+    <div class="kpi warning">
+      <div class="kpi-label">환자 월 실비 부담률</div>
+      <div class="kpi-value">68–82%</div>
+      <div class="kpi-note">건강보험 적용 후에도 시장가의 68–82%를 환자가 직접 부담</div>
+    </div>
+    
+    <div class="kpi ">
+      <div class="kpi-label">CGM 실제 이용률 (2023)</div>
+      <div class="kpi-value">34.3%</div>
+      <div class="kpi-note">등록 T1D 요양비 수급자 중 실제 CGM을 사용하는 환자 비율</div>
+    </div>
+    
+    <div class="kpi ">
+      <div class="kpi-label">기준금액 동결 기간</div>
+      <div class="kpi-value">2년 7개월+</div>
+      <div class="kpi-note">2022년 8월 이후 ₩210,000/분기 — 한 차례도 조정 없음</div>
+    </div>
+    
+  </div>
+
+  
+  <div class="section">
+    <h2>① 급여 기준금액 동결 — 시장가 대비 격차</h2>
+    <p class="context">
+      건강보험은 CGM 기준금액(₩210,000/분기)의 70%인 <strong>₩147,000/분기(월 약 ₩49,000)</strong>를 지원합니다.
+      2022년 8월 고시 2022-170 시행 이후 기준금액은 한 차례도 조정되지 않았습니다.
+      시장가(₩155,000–₩280,000/월)와의 격차는 구조적으로 고착화되어 있습니다.
+    </p>
+    <div id="ceiling-chart"></div>
+  </div>
+  
+
+  
+  <div class="section">
+    <h2>② CGM 실제 이용률 — 급여 적용에도 낮은 접근성</h2>
+    <p class="context">
+      급여 혜택을 받을 수 있는 1형 당뇨 요양비 등록 수급자 중
+      <strong>실제로 CGM을 사용하는 환자 비율</strong>입니다.
+      이용률이 낮다면 경제적 부담(높은 자기부담금)이 접근성을 여전히 제한하고 있음을 시사합니다.
+    </p>
+    <div id="adoption-chart"></div>
+  </div>
+  
+
+  
+  <div class="section">
+    <h2>③ 지역별 당뇨병 환자 분포 — 수도권 집중과 지방 소외</h2>
+    <p class="context">
+      시도별 전국 당뇨병 환자 중 차지하는 비율입니다.
+      경기·서울 두 지역이 전체의 약 44%를 차지합니다.
+      <span style="color:#dc2626;font-weight:600;">빨간색</span>으로 표시된 지역은 인구·의료 인프라 대비
+      환자 비율이 현저히 낮아 접근성 불평등이 우려되는 지역입니다.
+    </p>
+    <div id="regional-chart"></div>
+  </div>
+  
+
+  <div class="more-data">
+    <h2>이 분석에는 더 많은 데이터가 있습니다</h2>
+    <p class="lead">
+      이 페이지는 공개된 핵심 지표만 요약합니다.
+      아래 데이터셋은 추가 분석 및 협업 요청 시 제공 가능합니다.
+    </p>
+    <div class="dataset-grid">
+      <div class="dataset-item">
+        <strong>제품별 부담률</strong>
+        <span>25개 CGM 제품 각각의 환자 자기부담 비율 및 NHIS 보상 수준 비교</span>
+      </div>
+      <div class="dataset-item">
+        <strong>시군구 수준 분포</strong>
+        <span>247개 시군구별 1형·2형 당뇨 환자 수 (2022–2024)</span>
+      </div>
+      <div class="dataset-item">
+        <strong>연령별 T1D 코호트</strong>
+        <span>만 나이 1세 단위 1형 당뇨 환자 수 추이 (2013–2023, 약 1,100개 행)</span>
+      </div>
+      <div class="dataset-item">
+        <strong>인슐린 청구 월별 추이</strong>
+        <span>연령대별 인슐린 주사 청구 건수 월별 시계열 (2016–2023)</span>
+      </div>
+    </div>
+    <p class="cta">
+      데이터 요청, 협업 또는 문의는
+      <a href="https://github.com/pon00050/kr-health-monitor" target="_blank" rel="noopener">GitHub 저장소</a>에서
+      Issue 또는 Discussion을 열어주세요.
+    </p>
+  </div>
+
+  <p class="disclaimer">
+    이 보고서는 공공 데이터(NHIS, MFDS, HIRA)를 기반으로 자동 생성된 정책 분석 자료입니다.
+    의료 조언이나 투자 권고가 아니며, 정책 연구 및 공익 목적으로만 사용하십시오.
+    시장 가격은 2026-03-12 기준 공개 정보이며 실제 구매 조건에 따라 다를 수 있습니다.
+  </p>
+
+</div><!-- .page -->
+
+
+<script>
+  (function() {
+    var fig = {"data":[{"hoverinfo":"skip","line":{"color":"rgba(239,68,68,0)","width":0},"mode":"lines","showlegend":false,"x":[2018,2019,2020,2021,2022,2023,2024,2025,2026],"y":[280000,280000,280000,280000,280000,280000,280000,280000,280000],"type":"scatter"},{"fill":"tonexty","fillcolor":"rgba(239,68,68,0.12)","hovertemplate":"\uc2dc\uc7a5\uac00 \ubc94\uc704: \u20a9%{y:,}\u002f\uc6d4\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"rgba(239,68,68,0)","width":0},"mode":"lines","name":"\uc2dc\uc7a5\uac00 \ubc94\uc704 (\ucd5c\uc800\u2013\ucd5c\uace0)","x":[2018,2019,2020,2021,2022,2023,2024,2025,2026],"y":[155000,155000,155000,155000,155000,155000,155000,155000,155000],"type":"scatter"},{"hovertemplate":"\uc2dc\uc7a5\uac00 \uc911\uac04: \u20a9%{y:,}\u002f\uc6d4\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"rgb(239,68,68)","dash":"dot","width":2},"mode":"lines","name":"\uc2dc\uc7a5\uac00 \uc911\uac04\uac12","x":[2018,2019,2020,2021,2022,2023,2024,2025,2026],"y":[200000,200000,200000,200000,200000,200000,200000,200000,200000],"type":"scatter"},{"hovertemplate":"\uac74\uac15\ubcf4\ud5d8 \uc9c0\uc6d0: \u20a9%{y:,}\u002f\uc6d4\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"rgb(37,99,235)","width":3},"marker":{"size":7},"mode":"lines+markers","name":"\uac74\uac15\ubcf4\ud5d8 \uc6d4 \uc9c0\uc6d0\uc561 (\u20a949,000)","x":[2022,2023,2024,2025,2026],"y":[49000.0,49000.0,49000.0,49000.0,49000.0],"type":"scatter"}],"layout":{"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"shapes":[{"line":{"color":"rgba(37,99,235,0.45)","dash":"dash"},"type":"line","x0":2022,"x1":2022,"xref":"x","y0":0,"y1":1,"yref":"y domain"}],"annotations":[{"font":{"color":"rgb(37,99,235)","size":11},"showarrow":false,"text":"\uae09\uc5ec \uc2dc\uc791\u003cbr\u003e(\uace0\uc2dc 2022-170)","x":2022,"xanchor":"left","xref":"x","y":1,"yanchor":"top","yref":"y domain"}],"title":{"font":{"size":15,"color":"#1e293b"},"text":"\uc6d4\ubcc4 \uc2e4\ube44 \ubd80\ub2f4 \uad6c\uc870: \uac74\uac15\ubcf4\ud5d8 \uc9c0\uc6d0\uc561 vs \uc2dc\uc7a5 \uac00\uaca9"},"xaxis":{"title":{"text":"\uc5f0\ub3c4"},"dtick":1,"showgrid":true,"gridcolor":"rgba(0,0,0,0.05)"},"yaxis":{"title":{"text":"\uc6d4 \uae08\uc561 (\uc6d0)"},"tickformat":",.0f","tickprefix":"\u20a9","showgrid":true,"gridcolor":"rgba(0,0,0,0.05)"},"legend":{"orientation":"h","yanchor":"bottom","y":1.02,"xanchor":"right","x":1},"margin":{"t":80,"b":60,"l":90,"r":20},"hovermode":"x unified","plot_bgcolor":"white","paper_bgcolor":"white","height":420}};
+    Plotly.newPlot('ceiling-chart', fig.data, fig.layout, {responsive: true});
+  })();
+</script>
+
+
+<script>
+  (function() {
+    var fig = {"data":[{"hovertemplate":"\ub4f1\ub85d \uc218\uae09\uc790: %{y:,}\uba85\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"rgba(147,197,253,0.75)"},"name":"\ub4f1\ub85d T1D \uc694\uc591\ube44 \uc218\uae09\uc790","x":[2020,2021,2022,2023,2024],"y":[28325.0,31508.0,34580.0,37740.0,null],"type":"bar","xaxis":"x","yaxis":"y"},{"hovertemplate":"CGM \uc774\uc6a9\uc790: %{y:,}\uba85\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"rgba(37,99,235,0.85)"},"name":"\uc2e4\uc81c CGM \uc774\uc6a9\uc790","x":[2020,2021,2022,2023,2024],"y":[2528.0,7912.0,10188.0,12928.0,16214.0],"type":"bar","xaxis":"x","yaxis":"y"},{"hovertemplate":"\uc0ac\uc6a9\ub960: %{y:.1f}%\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"rgb(234,88,12)","width":2.5},"marker":{"color":"rgb(234,88,12)","size":8},"mode":"lines+markers+text","name":"\uc2e4\uc81c \uc0ac\uc6a9\ub960 (%)","text":["8.9%","25.1%","29.5%","34.3%",""],"textfont":{"color":"rgb(234,88,12)","size":11},"textposition":"top center","x":[2020,2021,2022,2023,2024],"y":[8.9,25.1,29.5,34.3,null],"type":"scatter","xaxis":"x","yaxis":"y2"}],"layout":{"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"anchor":"y","domain":[0.0,0.94],"title":{"text":"\uc5f0\ub3c4"},"dtick":1,"showgrid":true,"gridcolor":"rgba(0,0,0,0.05)"},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"\uc778\uc6d0 \uc218 (\uba85)"},"tickformat":",","showgrid":true,"gridcolor":"rgba(0,0,0,0.05)"},"yaxis2":{"anchor":"x","overlaying":"y","side":"right","title":{"text":"\uc0ac\uc6a9\ub960 (%)"},"ticksuffix":"%","showgrid":false,"range":[0,100]},"title":{"font":{"size":15,"color":"#1e293b"},"text":"CGM \uc2e4\uc81c \uc774\uc6a9\uc790 \uc218 vs \ub4f1\ub85d \uc218\uae09\uc790 (2020\u20132024)"},"legend":{"orientation":"h","yanchor":"bottom","y":1.02,"xanchor":"right","x":1},"margin":{"t":80,"b":60,"l":80,"r":80},"barmode":"overlay","plot_bgcolor":"white","paper_bgcolor":"white","height":420}};
+    Plotly.newPlot('adoption-chart', fig.data, fig.layout, {responsive: true});
+  })();
+</script>
+
+
+<script>
+  (function() {
+    var fig = {"data":[{"hovertemplate":"%{y}: \uc804\uad6d\uc758 %{x:.2f}%\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":["rgba(239,68,68,0.70)","rgba(239,68,68,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)","rgba(37,99,235,0.70)"]},"orientation":"h","text":["0.5%","1.1%","2.0%","2.9%","3.1%","3.2%","3.3%","3.7%","3.8%","4.2%","5.0%","5.1%","5.8%","5.9%","6.6%","19.9%","23.8%"],"textposition":"outside","x":[0.47,1.1,2.01,2.87,3.09,3.2,3.32,3.74,3.84,4.25,5.01,5.09,5.77,5.9,6.64,19.94,23.76],"y":["\uc138\uc885","\uc81c\uc8fc","\uc6b8\uc0b0","\uad11\uc8fc","\ub300\uc804","\ucda9\ubd81","\uac15\uc6d0","\uc804\ubd81","\uc804\ub0a8","\ucda9\ub0a8","\uacbd\ubd81","\ub300\uad6c","\uc778\ucc9c","\uacbd\ub0a8","\ubd80\uc0b0","\uc11c\uc6b8","\uacbd\uae30"],"type":"bar"}],"layout":{"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"font":{"size":15,"color":"#1e293b"},"text":"\uc2dc\ub3c4\ubcc4 \ub2f9\ub1e8\ubcd1 \ud658\uc790 \ubd84\ud3ec (2023\ub144) \u2014 \uc804\uad6d \ub300\ube44 \ube44\uc728"},"xaxis":{"title":{"text":"\uc804\uad6d \ud658\uc790 \uc911 \ube44\uc728 (%)"},"ticksuffix":"%","showgrid":true,"gridcolor":"rgba(0,0,0,0.05)"},"margin":{"t":60,"b":60,"l":80,"r":100},"yaxis":{"title":{"text":""}},"plot_bgcolor":"white","paper_bgcolor":"white","height":520,"annotations":[{"font":{"color":"rgb(239,68,68)","size":11},"showarrow":false,"text":"\ube68\uac04\uc0c9: \uc804\uad6d \ud3c9\uade0\ubcf4\ub2e4 \ud604\uc800\ud788 \ub0ae\uc740 \uc9c0\uc5ed","x":1,"xanchor":"right","xref":"paper","y":-0.11,"yref":"paper"}]}};
+    Plotly.newPlot('regional-chart', fig.data, fig.layout, {responsive: true});
+  })();
+</script>
+
+
+</body>
+</html>
