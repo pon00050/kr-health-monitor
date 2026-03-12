@@ -2,7 +2,7 @@
 Transform: join all extracted parquets and derive coverage analytics.
 
 Usage:
-    python 02_Pipeline/transform.py
+    python pipeline/build_master.py
 """
 
 from __future__ import annotations
@@ -15,14 +15,15 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.config import MARKET_PRICES_KRW, NHIS_REIMB_HISTORY, REGION_CODES
-from src.coverage_index import (
+from src.config import REGION_CODES
+from src.policy import MARKET_PRICES_KRW, NHIS_REIMB_HISTORY
+from src.coverage import (
     compute_coverage_adequacy_index,
     compute_quarterly_patient_burden,
     get_reimb_ceiling,
 )
-from src.regional_scorer import score_regional_disparity
-from src.storage import load_parquet, save_parquet
+from src.equity import score_regional_disparity
+from src.store import load_parquet, save_parquet
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -41,7 +42,8 @@ def main() -> None:
 
     regional = _load_or_empty(
         "hira_regional_diabetes",
-        ["year", "region_code", "region_name", "patient_count", "claim_count", "total_cost_krw"],
+        ["year", "region_code", "region_name", "patient_count", "visit_days",
+         "cost_krw_thousands", "icd_scope", "source"],
     )
     mfds = _load_or_empty(
         "mfds_device_prices",
@@ -50,7 +52,8 @@ def main() -> None:
     )
     nhis = _load_or_empty(
         "nhis_annual_stats",
-        ["year", "stat_category", "value", "unit", "source"],
+        ["year", "icd_code", "patient_count", "visit_days",
+         "cost_krw_thousands", "case_count", "source"],
     )
 
     if regional.empty:
@@ -87,7 +90,7 @@ def main() -> None:
                     "region_name": reg_row.get("region_name", REGION_CODES.get(region_code, "")),
                     "device_category": device_category,
                     "patient_count": reg_row.get("patient_count"),
-                    "claim_count": reg_row.get("claim_count"),
+                    "claim_count": reg_row.get("cost_krw_thousands"),  # renamed in new schema
                     "reimb_ceiling_quarterly_krw": ceiling,
                     "market_price_monthly_krw": monthly,
                     "price_tier": tier,

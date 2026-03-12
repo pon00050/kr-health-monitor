@@ -16,7 +16,8 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 
-from src.config import MARKET_PRICES_KRW, MFDS_API_BASE, MFDS_DEVICE_LIST_ENDPOINT
+from src.config import MFDS_API_BASE, MFDS_DEVICE_LIST_ENDPOINT
+from src.policy import MARKET_PRICES_KRW
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -82,21 +83,27 @@ def search_devices(keyword: str, api_key: str | None = None) -> pd.DataFrame:
                 time.sleep(_RETRY_DELAY)
 
         data = resp.json()
-        body = data.get("response", data).get("body", data)
+        # Actual response envelope: {"header": {...}, "body": {"totalCount": N, "items": [{"item": {...}}, ...]}}
+        body = data.get("body", data)
 
         if total_count is None:
             total_count = int(body.get("totalCount", 0))
             logger.info(f"MFDS search '{keyword}': {total_count} total results")
 
-        items = body.get("items", {})
-        if isinstance(items, dict):
-            items = items.get("item", [])
-        if isinstance(items, dict):
-            items = [items]
-        if not items:
+        raw_items = body.get("items", [])
+        if isinstance(raw_items, dict):
+            raw_items = raw_items.get("item", [])
+        if isinstance(raw_items, dict):
+            raw_items = [raw_items]
+        if not raw_items:
             break
 
-        all_items.extend(items)
+        # Each element may be {"item": {...}} — unwrap if so
+        for entry in raw_items:
+            if isinstance(entry, dict) and list(entry.keys()) == ["item"]:
+                all_items.append(entry["item"])
+            else:
+                all_items.append(entry)
         if len(all_items) >= total_count:
             break
         page_no += 1

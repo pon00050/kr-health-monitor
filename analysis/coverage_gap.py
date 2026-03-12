@@ -2,7 +2,7 @@
 Coverage adequacy analysis — Marimo app.
 
 Analyzes the 기준금액 vs market price gap for CGM sensors.
-Use run_coverage_analysis.py runner to execute non-interactively.
+Use run_coverage_gap.py runner to execute non-interactively.
 """
 
 import marimo
@@ -23,8 +23,8 @@ def __():
 
     import pandas as pd
     import plotly.graph_objects as go
-    from src.config import MARKET_PRICES_KRW, NHIS_REIMB_HISTORY
-    from src.coverage_index import compute_gap_series
+    from src.policy import MARKET_PRICES_KRW, NHIS_REIMB_HISTORY
+    from src.coverage import compute_gap_series
     return Path, MARKET_PRICES_KRW, NHIS_REIMB_HISTORY, compute_gap_series, go, pd, sys
 
 

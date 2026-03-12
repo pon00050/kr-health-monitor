@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from src.config import (
+from src.policy import (
     MARKET_PRICES_KRW,
     NHIS_REIMB_HISTORY,
     NHIS_REIMBURSEMENT_RATIO,

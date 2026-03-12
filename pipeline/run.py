@@ -2,14 +2,15 @@
 kr-health-monitor pipeline orchestrator.
 
 Usage:
-    python 02_Pipeline/pipeline.py [--device cgm_sensor] [--year-range 2018-2026]
-                                    [--sample N] [--sleep SECONDS] [--skip-analysis]
+    python pipeline/run.py [--device cgm_sensor] [--year-range 2018-2026]
+                           [--sample N] [--sleep SECONDS] [--skip-analysis]
 """
 
 from __future__ import annotations
 
 import argparse
 import logging
+import os
 import subprocess
 import sys
 import time
@@ -22,10 +23,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(mes
 logger = logging.getLogger(__name__)
 
 
+_SUBPROCESS_ENV = {**os.environ, "PYTHONUTF8": "1"}
+
+
 def run_stage(name: str, cmd: list[str], sleep: float = 0.0) -> bool:
     """Run a pipeline stage subprocess. Returns True on success."""
     logger.info(f"[Stage] {name}")
-    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
+    result = subprocess.run(cmd, cwd=str(PROJECT_ROOT), env=_SUBPROCESS_ENV)
     if result.returncode != 0:
         logger.error(f"Stage '{name}' failed with exit code {result.returncode}")
         return False
@@ -55,29 +59,31 @@ def main() -> None:
     py = sys.executable
 
     # Stage 1: HIRA regional diabetes Excel + treatment material API
-    hira_cmd = [py, "02_Pipeline/extract_hira_devices.py"]
+    hira_cmd = [py, "pipeline/fetch_hira.py"]
     if args.sample:
         hira_cmd += ["--sample", str(args.sample)]
     run_stage("1. Extract HIRA device data", hira_cmd, args.sleep)
 
     # Stage 2: MFDS device approvals
-    mfds_cmd = [py, "02_Pipeline/extract_mfds_prices.py"]
+    mfds_cmd = [py, "pipeline/fetch_mfds.py"]
     if args.sample:
         mfds_cmd += ["--sample", str(args.sample)]
     run_stage("2. Extract MFDS device prices", mfds_cmd, args.sleep)
 
-    # Stage 3: NHIS stats
-    nhis_cmd = [py, "02_Pipeline/extract_nhis_stats.py", "--year-range", args.year_range]
+    # Stage 3: NHIS stats (file-based — scans Data/raw/ automatically)
+    nhis_cmd = [py, "pipeline/fetch_nhis.py"]
+    if args.sample:
+        nhis_cmd += ["--sample", str(args.sample)]
     run_stage("3. Extract NHIS stats", nhis_cmd, args.sleep)
 
     # Stage 4: Transform → coverage_master.parquet
-    run_stage("4. Transform → coverage_master.parquet", [py, "02_Pipeline/transform.py"])
+    run_stage("4. Transform → coverage_master.parquet", [py, "pipeline/build_master.py"])
 
     # Stage 5 (optional): Analysis scripts
     if not args.skip_analysis:
-        run_stage("5a. Coverage adequacy analysis", [py, "03_Analysis/run_coverage_analysis.py"])
-        run_stage("5b. Regional variation analysis", [py, "03_Analysis/run_regional_variation.py"])
-        run_stage("5c. Trend analysis", [py, "03_Analysis/run_trend_analysis.py"])
+        run_stage("5a. Coverage adequacy analysis", [py, "analysis/run_coverage_gap.py"])
+        run_stage("5b. Regional variation analysis", [py, "analysis/run_regional_equity.py"])
+        run_stage("5c. Trend analysis", [py, "analysis/run_coverage_trend.py"])
 
     logger.info("Pipeline complete. Run `krh status` to verify outputs.")
 

@@ -2,7 +2,7 @@
 Trend analysis — Marimo app.
 
 Analyzes YoY adoption trends and gap widening since 2022 NHIS coverage.
-Use run_trend_analysis.py runner to execute non-interactively.
+Use run_coverage_trend.py runner to execute non-interactively.
 """
 
 import marimo
@@ -22,7 +22,7 @@ def __():
 
     import pandas as pd
     import plotly.graph_objects as go
-    from src.coverage_index import compute_gap_series
+    from src.coverage import compute_gap_series
     return Path, compute_gap_series, go, pd, sys
 
 

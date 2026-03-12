@@ -45,34 +45,36 @@ def compute_regional_adoption_rate(
 def score_regional_disparity(regional_df: pd.DataFrame) -> pd.DataFrame:
     """Add disparity scoring to a regional DataFrame.
 
-    Input must have column: adoption_rate_pct
+    Input must have column: patient_share_pct
+        (share of national diabetes patients in each region, not CGM adoption rate;
+        CGM adoption rate lives in coverage_trend.csv as adoption_rate_registered)
     Adds columns:
-        adoption_pct_rank: 1 = highest adoption (best), 17 = lowest
-        national_median_ratio: adoption_rate_pct / national_median (1.0 = at median)
-        disparity_flag: True if adoption_rate < 50% of national median
+        share_pct_rank: 1 = largest patient share, 17 = smallest
+        national_median_ratio: patient_share_pct / national_median (1.0 = at median)
+        disparity_flag: True if patient_share_pct < 50% of national median
     """
-    if "adoption_rate_pct" not in regional_df.columns:
-        raise ValueError("regional_df must have column 'adoption_rate_pct'")
+    if "patient_share_pct" not in regional_df.columns:
+        raise ValueError("regional_df must have column 'patient_share_pct'")
 
     df = regional_df.copy()
-    df["adoption_pct_rank"] = df["adoption_rate_pct"].rank(ascending=False, method="min").astype(int)
+    df["share_pct_rank"] = df["patient_share_pct"].rank(ascending=False, method="min").astype(int)
 
-    national_median = df["adoption_rate_pct"].median()
-    df["national_median_ratio"] = (df["adoption_rate_pct"] / national_median).round(3)
-    df["disparity_flag"] = df["adoption_rate_pct"] < (national_median * 0.50)
+    national_median = df["patient_share_pct"].median()
+    df["national_median_ratio"] = (df["patient_share_pct"] / national_median).round(3)
+    df["disparity_flag"] = df["patient_share_pct"] < (national_median * 0.50)
 
     return df
 
 
 def compute_disparity_index(regional_df: pd.DataFrame) -> float:
-    """Compute a disparity index (max/min adoption ratio).
+    """Compute a disparity index (max/min patient share ratio).
 
-    A value of 2.1 means the best-covered region has 2.1× the adoption rate
-    of the worst-covered region.
+    A value of 2.1 means the region with the largest patient share has 2.1×
+    the share of the region with the smallest share.
     """
-    if "adoption_rate_pct" not in regional_df.columns:
-        raise ValueError("regional_df must have column 'adoption_rate_pct'")
-    rates = regional_df["adoption_rate_pct"].dropna()
+    if "patient_share_pct" not in regional_df.columns:
+        raise ValueError("regional_df must have column 'patient_share_pct'")
+    rates = regional_df["patient_share_pct"].dropna()
     if rates.empty or rates.min() == 0:
         return float("inf")
     return round(rates.max() / rates.min(), 3)

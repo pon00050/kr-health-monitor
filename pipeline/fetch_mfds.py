@@ -5,7 +5,7 @@ Searches for CGM and related devices; annotates with hardcoded market prices.
 NOTE: No price data is available from the MFDS API — prices are from verified research.
 
 Usage:
-    python 02_Pipeline/extract_mfds_prices.py [--keyword 연속혈당] [--sample N]
+    python pipeline/fetch_mfds.py [--keyword 연속혈당] [--sample N]
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.mfds_client import get_cgm_devices, search_devices
-from src.storage import save_parquet
+from src.store import save_parquet
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

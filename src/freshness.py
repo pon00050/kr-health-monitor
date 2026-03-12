@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
-PROCESSED_DIR = _PROJECT_ROOT / "01_Data" / "processed"
+PROCESSED_DIR = _PROJECT_ROOT / "data" / "processed"
 
 # DAG: output_name → [list of input names] (parquet stems, no extension)
 # Empty list = refreshed from external API, always consider fresh unless missing
@@ -20,6 +20,8 @@ AUDIT_DAG: dict[str, list[str]] = {
     "hira_treatment_materials": [],
     "mfds_device_prices": [],
     "nhis_annual_stats": [],
+    "nhis_diabetes_utilization_rate": [],
+    "nhis_insulin_claims_monthly": [],
     "coverage_master": [
         "hira_regional_diabetes",
         "mfds_device_prices",
@@ -29,15 +31,15 @@ AUDIT_DAG: dict[str, list[str]] = {
 
 # Analysis CSV outputs → parquet dependencies
 ANALYSIS_DAG: dict[str, list[str]] = {
-    "coverage_adequacy": ["coverage_master"],
-    "regional_variation": ["coverage_master"],
-    "trend_analysis": ["coverage_master"],
+    "coverage_gap": ["coverage_master"],
+    "regional_equity": ["coverage_master"],
+    "coverage_trend": ["coverage_master"],
 }
 
 
 def _mtime(name: str, is_csv: bool = False) -> float | None:
     if is_csv:
-        analysis_dir = _PROJECT_ROOT / "03_Analysis"
+        analysis_dir = _PROJECT_ROOT / "analysis"
         path = analysis_dir / f"{name}.csv"
     else:
         path = PROCESSED_DIR / f"{name}.parquet"

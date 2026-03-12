@@ -1,8 +1,14 @@
 """
 Regional variation analysis — Marimo app.
 
-Ranks all 17 시도 by CGM adoption rate and quantifies disparity.
-Use run_regional_variation.py runner to execute non-interactively.
+Ranks all 17 시도 by patient_share_pct (each region's share of national diabetes
+patients) and quantifies geographic disparity.
+
+NOTE: patient_share_pct ≠ CGM adoption rate.
+  - patient_share_pct = regional_patients / national_total × 100  (this file)
+  - adoption_rate_registered = cgm_users / t1d_registered × 100  (coverage_trend.csv)
+
+Use run_regional_equity.py runner to execute non-interactively.
 """
 
 import marimo
@@ -23,8 +29,8 @@ def __():
     import pandas as pd
     import plotly.express as px
     from src.config import REGION_CODES
-    from src.regional_scorer import compute_disparity_index, score_regional_disparity
-    from src.storage import load_parquet
+    from src.equity import compute_disparity_index, score_regional_disparity
+    from src.store import load_parquet
     return Path, REGION_CODES, compute_disparity_index, load_parquet, pd, px, score_regional_disparity, sys
 
 
@@ -60,15 +66,15 @@ def __(regional_raw, score_regional_disparity):
     latest_year = regional_raw["year"].max()
     df_latest = regional_raw[regional_raw["year"] == latest_year].copy()
 
-    # Use patient_count as adoption proxy (actual CGM adoption by region unavailable)
-    df_latest["adoption_rate_pct"] = (
+    # patient_share_pct = regional share of national diabetes patients (NOT CGM adoption rate)
+    df_latest["patient_share_pct"] = (
         df_latest["patient_count"] / df_latest["patient_count"].sum() * 100
     ).round(2)
 
     scored = score_regional_disparity(df_latest)
-    scored_sorted = scored.sort_values("adoption_pct_rank")
-    scored_sorted[["region_name", "adoption_rate_pct", "national_median_ratio",
-                   "adoption_pct_rank", "disparity_flag"]]
+    scored_sorted = scored.sort_values("share_pct_rank")
+    scored_sorted[["region_name", "patient_share_pct", "national_median_ratio",
+                   "share_pct_rank", "disparity_flag"]]
     return df_latest, latest_year, scored, scored_sorted
 
 
@@ -76,7 +82,7 @@ def __(regional_raw, score_regional_disparity):
 def __(compute_disparity_index, scored):
     disparity_idx = compute_disparity_index(scored)
     print(f"지역 격차 지수 (최고/최저 비율): {disparity_idx:.1f}×")
-    print(f"전국 중앙값: {scored['adoption_rate_pct'].median():.1f}%")
+    print(f"전국 중앙값: {scored['patient_share_pct'].median():.1f}%")
     print(f"격차 플래그 지역 수: {scored['disparity_flag'].sum()} / 17")
     return (disparity_idx,)
 
@@ -87,18 +93,18 @@ def __(px, scored_sorted):
     fig = px.bar(
         scored_sorted,
         x="region_name",
-        y="adoption_rate_pct",
+        y="patient_share_pct",
         color="disparity_flag",
         color_discrete_map={True: "#fc8181", False: "#4299e1"},
-        title=f"지역별 CGM 급여 이용률 (시도별 순위)",
+        title=f"지역별 당뇨병 환자 분포 (시도별 순위)",
         labels={
             "region_name": "시도",
-            "adoption_rate_pct": "이용률 (%)",
+            "patient_share_pct": "환자 비율 (%)",
             "disparity_flag": "격차 플래그",
         },
     )
     fig.add_hline(
-        y=scored_sorted["adoption_rate_pct"].median(),
+        y=scored_sorted["patient_share_pct"].median(),
         line_dash="dash",
         annotation_text="전국 중앙값",
     )
@@ -112,7 +118,7 @@ def __(regional_raw, score_regional_disparity):
     output_rows = []
     for year in sorted(regional_raw["year"].unique()):
         yr_df = regional_raw[regional_raw["year"] == year].copy()
-        yr_df["adoption_rate_pct"] = (
+        yr_df["patient_share_pct"] = (
             yr_df["patient_count"] / yr_df["patient_count"].sum() * 100
         ).round(2)
         scored_yr = score_regional_disparity(yr_df)

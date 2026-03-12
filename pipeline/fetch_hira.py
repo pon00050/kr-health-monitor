@@ -5,7 +5,7 @@ HIRA device data extractor — two distinct data pulls:
   Part B: HIRA Treatment Material API (CGM product M-codes + coverage status)
 
 Usage:
-    python 02_Pipeline/extract_hira_devices.py [--skip-excel] [--skip-api] [--sample N]
+    python pipeline/fetch_hira.py [--skip-excel] [--skip-api] [--sample N]
 """
 
 from __future__ import annotations
@@ -18,28 +18,40 @@ from pathlib import Path
 # Allow running from project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.config import DATA_SOURCE_DIR
 from src.hira_client import (
     download_regional_diabetes_stats,
     get_cgm_material_info,
     parse_regional_diabetes_excel,
 )
-from src.storage import save_parquet
+from src.store import save_parquet
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
-RAW_DIR = Path(__file__).resolve().parent.parent / "01_Data" / "raw"
+RAW_DIR = DATA_SOURCE_DIR
+
+# Known local copy of the HIRA regional diabetes Excel (downloaded manually)
+_LOCAL_HIRA_XLSX = (
+    RAW_DIR / "[건강보험심사평가원] (2024) 지역별 당뇨병 진료현황(2019년~2023년).xlsx"
+)
 
 
 def extract_regional_diabetes(output_dir: Path) -> None:
-    """Part A: Download and parse HIRA regional diabetes Excel."""
+    """Part A: Parse HIRA regional diabetes Excel (local file preferred, download fallback)."""
     logger.info("Part A: HIRA regional diabetes Excel (sno=13702)")
-    try:
-        xlsx_path = download_regional_diabetes_stats(output_dir)
-    except Exception as e:
-        logger.error(f"Excel download failed: {e}")
-        logger.info("If the download URL has changed, check opendata.hira.or.kr for sno=13702")
-        return
+
+    # Use local file if present (avoids flaky opendata.hira.or.kr URL)
+    if _LOCAL_HIRA_XLSX.exists():
+        xlsx_path = _LOCAL_HIRA_XLSX
+        logger.info(f"Using local file: {xlsx_path.name}")
+    else:
+        try:
+            xlsx_path = download_regional_diabetes_stats(output_dir)
+        except Exception as e:
+            logger.error(f"Excel download failed: {e}")
+            logger.info("Place the Excel manually at: Data/raw/[건강보험심사평가원] ...")
+            return
 
     try:
         df = parse_regional_diabetes_excel(xlsx_path)
@@ -66,10 +78,10 @@ def extract_treatment_materials(sample: int | None = None) -> None:
         df = get_cgm_material_info()
     except EnvironmentError as e:
         logger.error(str(e))
-        return
+        sys.exit(1)
     except Exception as e:
         logger.error(f"Treatment material API failed: {e}")
-        return
+        sys.exit(1)
 
     if df.empty:
         logger.warning("No treatment material data returned — API may require activation")

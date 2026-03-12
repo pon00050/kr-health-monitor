@@ -197,7 +197,6 @@ All data is publicly available at no cost. API keys are required for live fetche
 3. **Additional devices** — insulin pumps, oxygen therapy, other 급여 devices
 4. **International comparison** — comparable gap analysis for other OECD countries
 
-Open an issue before starting large changes.
 
 ---
 
