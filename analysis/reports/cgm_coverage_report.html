@@ -68,6 +68,20 @@
     .cta a { color: #1d4ed8; font-weight: 600; text-decoration: none; }
     .cta a:hover { text-decoration: underline; }
 
+    /* Policy context notes */
+    .policy-note-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px; margin-top: 4px;
+    }
+    .policy-note {
+      background: #f8fafc; border-radius: 8px; padding: 16px;
+      border-left: 3px solid #94a3b8; font-size: 0.83rem; color: #334155; line-height: 1.65;
+    }
+    .policy-note .pn-label {
+      font-weight: 700; color: #1e293b; font-size: 0.85rem; margin-bottom: 6px;
+    }
+
     /* Disclaimer */
     .disclaimer {
       font-size: 0.75rem; color: #94a3b8;
@@ -83,7 +97,7 @@
     <p class="subtitle">연속혈당측정기(CGM) 건강보험 급여 적정성 분석 — 1형 당뇨 환자 실비 부담 현황</p>
     <p class="meta">
       데이터 기준: 2026-03-12 &nbsp;|&nbsp;
-      생성일: 2026-03-12 19:41 &nbsp;|&nbsp;
+      생성일: 2026-03-12 20:26 &nbsp;|&nbsp;
       출처: 국민건강보험공단(NHIS), 건강보험심사평가원(HIRA), 식품의약품안전처(MFDS)
     </p>
   </header>
@@ -146,6 +160,36 @@
     <div id="regional-chart"></div>
   </div>
   
+
+  <div class="section">
+    <h2>④ 급여 이력 및 정책 맥락</h2>
+    <p class="context">
+      현행 기준금액 구조를 이해하기 위한 정책 배경입니다.
+      아래 내용은 한국1형당뇨병환우회가 발행한 요양비 안내 자료(가디언 커넥트 사용자용)에 근거합니다.
+    </p>
+    <div class="policy-note-grid">
+      <div class="policy-note">
+        <div class="pn-label">요양비 급여 개시 (2019년 1월)</div>
+        메드트로닉 엔라이트 센서에 한해 2019년 1월 1일부터 요양비 방식의 CGM 급여가 시작되었습니다.
+        현행 고시 2022-170(2022년 8월)은 이 초기 제도를 개편·확대한 것으로,
+        CGM 급여 자체가 2022년에 처음 도입된 것은 아닙니다.
+      </div>
+      <div class="policy-note">
+        <div class="pn-label">차상위계층 자기부담 면제</div>
+        요양비 제도 하에서 차상위계층 환자는 기준금액 전액을 지원받아 자기부담이 없습니다.
+        정부가 경제적 취약계층에 대해 완전 지원이 적절하다고 제도 설계 단계에서 이미 인정한 것입니다.
+      </div>
+      <div class="policy-note">
+        <div class="pn-label">처방 갱신 시 데이터 제출 요건</div>
+        첫 처방 이후 모든 갱신 처방에는 CGM 데이터 리포트(케어링크 등) 제출이 필요합니다.
+        인터넷 접근성이 낮거나 전문의 방문이 어려운 농촌·고령 환자에게
+        이 절차적 요건은 추가적인 접근 장벽으로 작용할 수 있습니다.
+      </div>
+    </div>
+    <p style="font-size:0.72rem;color:#94a3b8;margin-top:14px;">
+      출처: 한국1형당뇨병환우회 급여 안내문 (가디언 커넥트 사용자용). 공식 정부 문서가 아닌 환자단체 발행 안내 자료입니다.
+    </p>
+  </div>
 
   <div class="more-data">
     <h2>관련 데이터 문의</h2>
