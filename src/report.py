@@ -398,7 +398,7 @@ _TEMPLATE = """<!DOCTYPE html>
   {% endif %}
 
   <div class="more-data">
-    <h2>이 분석에는 더 많은 데이터가 있습니다</h2>
+    <h2>관련 데이터 문의</h2>
     <p class="lead">
       이 페이지는 공개된 핵심 지표만 요약합니다.
       아래 데이터셋은 추가 분석 및 협업 요청 시 제공 가능합니다.
@@ -422,9 +422,7 @@ _TEMPLATE = """<!DOCTYPE html>
       </div>
     </div>
     <p class="cta">
-      데이터 요청, 협업 또는 문의는
-      <a href="https://github.com/{{ github_repo }}" target="_blank" rel="noopener">GitHub 저장소</a>에서
-      Issue 또는 Discussion을 열어주세요.
+      이메일 문의: <a href="mailto:pon00050@gmail.com">pon00050@gmail.com</a>
     </p>
   </div>
 
