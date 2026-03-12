@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.coverage_index import (
+from src.coverage import (
     compute_coverage_adequacy_ratio,
     compute_gap_series,
     compute_quarterly_patient_burden,
